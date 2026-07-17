@@ -41,6 +41,15 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:java"
+          output: src/reports        # write CodeQL SARIF here
+
+      - name: Upload CodeQL report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-report
+          path: src/reports/
+          if-no-files-found: warn
 
   snyk:
     name: Snyk dependency scan
@@ -63,17 +72,20 @@ jobs:
 
       # Runs only if SNYK_TOKEN is configured; otherwise skipped so the
       # pipeline stays green even without a Snyk account.
+      - name: Prepare reports directory
+        run: mkdir -p src/reports
+
       - name: Snyk vulnerability scan
         if: ${{ env.SNYK_TOKEN != '' }}
         continue-on-error: true
         uses: snyk/actions/maven@master
         with:
-          args: --sarif-file-output=snyk.sarif
+          args: --sarif-file-output=src/reports/snyk.sarif
 
       - name: Upload Snyk report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: snyk-report
-          path: snyk.sarif
+          path: src/reports/
           if-no-files-found: warn
