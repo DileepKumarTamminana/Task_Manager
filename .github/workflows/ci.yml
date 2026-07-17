@@ -25,6 +25,13 @@ jobs:
       - name: Build and run tests
         run: mvn -B verify
 
+      # The build produces the JAR in target/; copy it into src/reports/
+      # so all artifacts live under one directory.
+      - name: Collect JAR into src/reports
+        run: |
+          mkdir -p src/reports
+          cp target/*.jar src/reports/
+
       - name: Upload JAR artifact
         if: success()
         uses: actions/upload-artifact@v4
